@@ -70,7 +70,8 @@ module Ancestry
     end
 
     def ancestor_conditions
-      {self.base_class.primary_key => ancestor_ids}
+      c = {self.base_class.primary_key => ancestor_ids}
+      c.merge( { :type => self.base_class.sti_type } )
     end
 
     def ancestors depth_options = {}
@@ -82,7 +83,8 @@ module Ancestry
     end
 
     def path_conditions
-      {self.base_class.primary_key => path_ids}
+      c = {self.base_class.primary_key => path_ids}
+      c.merge( { :type => self.base_class.sti_type } )
     end
 
     def path depth_options = {}
@@ -129,7 +131,8 @@ module Ancestry
 
     # Children
     def child_conditions
-      {self.base_class.ancestry_column => child_ancestry}
+      c = {self.base_class.ancestry_column => child_ancestry}
+      c.merge( { :type => self.base_class.sti_type } )
     end
 
     def children
@@ -150,7 +153,8 @@ module Ancestry
 
     # Siblings
     def sibling_conditions
-      {self.base_class.ancestry_column => read_attribute(self.base_class.ancestry_column)}
+      c = {self.base_class.ancestry_column => read_attribute(self.base_class.ancestry_column)}
+      c.merge( { :type => self.base_class.sti_type } )
     end
 
     def siblings
@@ -171,7 +175,9 @@ module Ancestry
 
     # Descendants
     def descendant_conditions
-      ["#{self.base_class.table_name}.#{self.base_class.ancestry_column} like ? or #{self.base_class.table_name}.#{self.base_class.ancestry_column} = ?", "#{child_ancestry}/%", child_ancestry]
+      c = ["#{self.base_class.table_name}.#{self.base_class.ancestry_column} like ? or #{self.base_class.table_name}.#{self.base_class.ancestry_column} = ?", "#{child_ancestry}/%", child_ancestry]
+      c[ 0 ] = "( #{ c[ 0 ] } ) AND type = ? "
+      c << self.base_class.sti_type
     end
 
     def descendants depth_options = {}
@@ -184,7 +190,9 @@ module Ancestry
 
     # Subtree
     def subtree_conditions
-      ["#{self.base_class.table_name}.#{self.base_class.primary_key} = ? or #{self.base_class.table_name}.#{self.base_class.ancestry_column} like ? or #{self.base_class.table_name}.#{self.base_class.ancestry_column} = ?", self.id, "#{child_ancestry}/%", child_ancestry]
+      c = ["#{self.base_class.table_name}.#{self.base_class.primary_key} = ? or #{self.base_class.table_name}.#{self.base_class.ancestry_column} like ? or #{self.base_class.table_name}.#{self.base_class.ancestry_column} = ?", self.id, "#{child_ancestry}/%", child_ancestry]
+      c[ 0 ] = "( #{ c[ 0 ] } ) AND type = ? "
+      c << self.base_class.sti_type
     end
 
     def subtree depth_options = {}
