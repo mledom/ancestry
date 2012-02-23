@@ -71,7 +71,7 @@ module Ancestry
 
     def ancestor_conditions
       c = {self.base_class.primary_key => ancestor_ids}
-      c.merge( { :type => self.base_class.sti_type } ) if self.base_class.sti_type.present?
+      c.merge( { :type => self.class.name } ) if self.base_class.for_sti
     end
 
     def ancestors depth_options = {}
@@ -84,7 +84,7 @@ module Ancestry
 
     def path_conditions
       c = {self.base_class.primary_key => path_ids}
-      c.merge( { :type => self.base_class.sti_type } ) if self.base_class.sti_type.present?
+      c.merge( { :type => self.class.name } ) if self.base_class.for_sti
     end
 
     def path depth_options = {}
@@ -132,7 +132,7 @@ module Ancestry
     # Children
     def child_conditions
       c = {self.base_class.ancestry_column => child_ancestry}
-      c.merge( { :type => self.base_class.sti_type } ) if self.base_class.sti_type.present?
+      c.merge( { :type => self.class.name } ) if self.base_class.for_sti
     end
 
     def children
@@ -154,7 +154,7 @@ module Ancestry
     # Siblings
     def sibling_conditions
       c = {self.base_class.ancestry_column => read_attribute(self.base_class.ancestry_column)}
-      c.merge( { :type => self.base_class.sti_type } ) if self.base_class.sti_type.present?
+      c.merge( { :type => self.class.name } ) if self.base_class.for_sti
     end
 
     def siblings
@@ -176,8 +176,8 @@ module Ancestry
     # Descendants
     def descendant_conditions
       c = ["#{self.base_class.table_name}.#{self.base_class.ancestry_column} like ? or #{self.base_class.table_name}.#{self.base_class.ancestry_column} = ?", "#{child_ancestry}/%", child_ancestry]
-      c[ 0 ] = "( #{ c[ 0 ] } ) AND type = ? " if self.base_class.sti_type.present?
-      c << self.base_class.sti_type if self.base_class.sti_type.present?
+      c[ 0 ] = "( #{ c[ 0 ] } ) AND type = ? " if self.base_class.for_sti
+      c << self.class.name if self.base_class.for_sti
     end
 
     def descendants depth_options = {}
@@ -191,8 +191,8 @@ module Ancestry
     # Subtree
     def subtree_conditions
       c = ["#{self.base_class.table_name}.#{self.base_class.primary_key} = ? or #{self.base_class.table_name}.#{self.base_class.ancestry_column} like ? or #{self.base_class.table_name}.#{self.base_class.ancestry_column} = ?", self.id, "#{child_ancestry}/%", child_ancestry]
-      c[ 0 ] = "( #{ c[ 0 ] } ) AND type = ? " if self.base_class.sti_type.present?
-      c << self.base_class.sti_type if self.base_class.sti_type.present?
+      c[ 0 ] = "( #{ c[ 0 ] } ) AND type = ? " if self.base_class.for_sti
+      c << self.class.name if self.base_class.for_sti
     end
 
     def subtree depth_options = {}

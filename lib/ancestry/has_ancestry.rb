@@ -7,7 +7,7 @@ class << ActiveRecord::Base
     # Check options
     raise Ancestry::AncestryException.new("Options for has_ancestry must be in a hash.") unless options.is_a? Hash
     options.each do |key, value|
-      unless [:ancestry_column, :orphan_strategy, :cache_depth, :depth_cache_column, :primary_key_format, :sti_type].include? key
+      unless [:ancestry_column, :orphan_strategy, :cache_depth, :depth_cache_column, :primary_key_format, :for_sti].include? key
         raise Ancestry::AncestryException.new("Unknown option for has_ancestry: #{key.inspect} => #{value.inspect}.")
       end
     end
@@ -19,8 +19,8 @@ class << ActiveRecord::Base
     extend Ancestry::ClassMethods
     
     # Create sti type accessor and set to option or default
-    cattr_accessor :sti_type
-    self.sti_type = options[:sti_type] || nil
+    cattr_accessor :for_sti
+    self.for_sti = options[:for_sti] || false
 
     # Create ancestry column accessor and set to option or default
     cattr_accessor :ancestry_column
